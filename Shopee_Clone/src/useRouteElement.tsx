@@ -8,6 +8,7 @@ import Profile from './pages/Profile'
 import { useContext } from 'react'
 import { AppContext } from './Contexts/app.context'
 import path from './constants/path'
+import ProductDetail from './pages/ProductDetail'
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext)
   return isAuthenticated ? <Outlet /> : <Navigate to='/login' />
@@ -55,7 +56,16 @@ export default function useRouteElement() {
       ]
     },
     {
-      path: '/',
+      path: path.productDetail,
+      index: true,
+      element: (
+        <MainLayout>
+          <ProductDetail />
+        </MainLayout>
+      )
+    },
+    {
+      path: '',
       index: true,
       element: (
         <MainLayout>
