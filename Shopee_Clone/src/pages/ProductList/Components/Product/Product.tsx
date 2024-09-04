@@ -9,7 +9,7 @@ interface Props {
 }
 export default function Product({ product }: Props) {
   return (
-    <Link to={`${path.home} ${product._id}`}>
+    <Link to={`${path.home}${product._id}`}>
       <div className='relative hover:-translate-y-1 hover:shadow-md duration-100 transition-transform '>
         <div className='bg-yellow-300 w-[45px] absolute right-0 top-0'>
           <p className='text-orange p-1'>{Math.floor((product.price / product.price_before_discount) * 100)}%</p>
