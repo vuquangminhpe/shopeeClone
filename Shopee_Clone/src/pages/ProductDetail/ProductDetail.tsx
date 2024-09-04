@@ -1,92 +1,89 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import productApi from '../../api/product.api'
-import { formatCurrency } from '../../utils/utils'
+import ProductRating from '../ProductList/Components/ProductRating'
+import { formatCurrency, formatNumberToSocialStyle } from '../../utils/utils'
+
 export default function ProductDetail() {
   const { id } = useParams()
   const { data: productDetailData } = useQuery({
     queryKey: ['product', id],
     queryFn: () => productApi.getProductDetail(id as string)
   })
+
   const product = productDetailData?.data.data
-  console.log('product', productDetailData)
-  console.log('productssssssss', product)
 
   return (
-    <div className='border-gray-300 py-5'>
-      <div className='container'>
-        <div className='grid grid-cols-12 gap-6'>
-          <div className='col-span-4'>
-            <img src={product?.image} className='h-[500px] object-fill w-full' alt='' />
-          </div>
-          <div className='col-span-8'>
-            <div>
-              <span className='w-[15px] bg-orange text-white text-xs p-1'>Preferred</span>
-              {product?.name}
-            </div>
-            <div className='flex relative mt-2'>
-              <div className='border-b-2 border-orange w-6 mr-1 text-orange'>{product?.rating} </div>
-              {Array(5)
-                .fill(0)
-                .map((productItemDetail: string) => (
-                  <span key={productItemDetail}>
-                    {' '}
-                    <svg viewBox='0 0 9.5 8' className='mr-1 h-4 w-4'>
-                      <defs>
-                        <linearGradient id='ratingStarGradient' x1='50%' x2='50%' y1='0%' y2='100%'>
-                          <stop offset={0} stopColor='#ffca11' />
-                          <stop offset={1} stopColor='#ffad27' />
-                        </linearGradient>
-                        <polygon
-                          id='ratingStar'
-                          points='14.910357 6.35294118 12.4209136 7.66171903 12.896355 4.88968305 10.8823529 2.92651626 13.6656353 2.52208166 14.910357 0 16.1550787 2.52208166 18.9383611 2.92651626 16.924359 4.88968305 17.3998004 7.66171903'
-                        />
-                      </defs>
-                      <g fill='url(#ratingStarGradient)' fillRule='evenodd' stroke='none' strokeWidth={1}>
-                        <g transform='translate(-876 -1270)'>
-                          <g transform='translate(155 992)'>
-                            <g transform='translate(600 29)'>
-                              <g transform='translate(10 239)'>
-                                <g transform='translate(101 10)'>
-                                  <use stroke='#ffa727' strokeWidth='.5' xlinkHref='#ratingStar' />
-                                </g>
-                              </g>
-                            </g>
-                          </g>
-                        </g>
-                      </g>
-                    </svg>
-                  </span>
-                ))}
-              <div className='border-l-[1px] border-gray-400 mx-2'></div>
-              <div>{product?.view} đánh giá</div>
-              <div className='absolute right-0 opacity-50'>Báo Cáo</div>
-            </div>
-            <div className='bg-orange mt-2 flex justify-between pr-1'>
-              <img
-                className='p-3'
-                src='https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/productdetailspage/dea74facf15efdbdb982.svg'
-                alt=''
-              />
-              <div className='flex'>
+    <div className='border-gray-200 py-6'>
+      <div className='bg-white p-4 shadow'>
+        <div className='container'>
+          <div className='grid grid-cols-12 gap-9'>
+            <div className='col-span-5'>
+              <div className='relative w-full shadow pt-[100%]'>
                 <img
-                  alt='icon clock'
-                  src='https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/productdetailspage/db37ab11d87a41f61b7d.svg'
-                  height='17'
-                  width='17'
-                  className='-translate-y-[2px] mr-1 object-contain'
-                ></img>
-                <div className='leading-10 text-white'>Kết thúc trong </div>
+                  src={product?.image}
+                  alt=''
+                  className='absolute top-0 left-0 h-full w-full bg-white object-cover'
+                />
+              </div>
+              <div className='relative mt-4 grid grid-cols-5 gap-1'>
+                <button className='absolute left-0 top-1/2 z-10 h-9 w-5 -translate-y-1/2 bg-black/20 text-white'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    strokeWidth={1.5}
+                    stroke='currentColor'
+                    className='size-5'
+                  >
+                    <path strokeLinecap='round' strokeLinejoin='round' d='M15.75 19.5 8.25 12l7.5-7.5' />
+                  </svg>
+                </button>
+                {product?.images.slice(0, 5).map((img, index) => {
+                  const isActive = index === 0
+                  return (
+                    <div className='relative w-full pt-[100%]'>
+                      <img src={img} alt='' className='absolute top-0 left-0 h-full w-full bg-white object-cover' />
+                      {isActive && <div className='absolute inset-0 border-2 border-orange'></div>}
+                    </div>
+                  )
+                })}
+                <button className='translate-x-3 absolute right-0 top-1/2 z-10 h-9 w-5 -translate-y-1/2 bg-black/20 text-white'>
+                  {' '}
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    strokeWidth={1.5}
+                    stroke='currentColor'
+                    className='size-5'
+                  >
+                    <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
+                  </svg>
+                </button>
               </div>
             </div>
-            <div className=' flex mt-2 bg-gray-100/5'>
-              <div className='text-gray-400 leading-7 text-sm mr-4 line-through'>
-                {formatCurrency(product?.price_before_discount)}đ
-              </div>{' '}
-              <div className='text-orange text-xl ml-1'>{formatCurrency(product?.price)}đ</div>
-              <p className='bg-orange ml-3 text-white rounded-md p-1'>
-                {Math.floor((product.price / product.price_before_discount) * 100)}% giảm
-              </p>
+            <div className='col-span-7'>
+              <h1 className='text-xl font-medium uppercase'>{product?.name}</h1>
+              <div className='mt-8 flex items-center'>
+                <div className='flex items-center'>
+                  <span className='mr-1 border-b border-b-orange text-orange'>{product?.rating}</span>
+                  <ProductRating
+                    rating={product?.rating}
+                    activeClassName='fill-orange text-orange size-4'
+                    nonActiveClassName='fill-gray-300 text-gray-300 size-4'
+                  />
+                </div>
+                <div className='mx-4 h-4 w-[1[px] bg-gray-300'>
+                  <div className='bg-white'>
+                    <span>{formatNumberToSocialStyle(product?.sold)}</span>
+                    <span className='ml-1 text-gray-500'>Đã bán</span>
+                  </div>
+                </div>
+              </div>
+              <div className='mt-8 flex items-center bg-gray-50 px-5 py-4'>
+                <div className='text-gray-500 line-through'>đ{formatCurrency(product?.price_before_discount)}</div>
+              </div>
             </div>
           </div>
         </div>
