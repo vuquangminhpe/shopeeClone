@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Product as Products } from '../../../../types/product.type'
-import { formatCurrency, formatNumberToSocialStyle } from '../../../../utils/utils'
+import { formatCurrency, formatNumberToSocialStyle, rateSale } from '../../../../utils/utils'
 import ProductRating from '../ProductRating'
 import path from '../../../../constants/path'
 
@@ -12,7 +12,7 @@ export default function Product({ product }: Props) {
     <Link to={`${path.home}${product._id}`}>
       <div className='relative hover:-translate-y-1 hover:shadow-md duration-100 transition-transform '>
         <div className='bg-yellow-300 w-[45px] absolute right-0 top-0'>
-          <p className='text-orange p-1'>{Math.floor((product.price / product.price_before_discount) * 100)}%</p>
+          <p className='text-orange p-1'>{rateSale(product.price_before_discount, product.price)}</p>
           <div className='text-white'>Giảm</div>
         </div>
         <div className='overflow-hidden ml-3 mb-4'>

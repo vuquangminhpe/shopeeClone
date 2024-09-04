@@ -9,21 +9,19 @@ export function isAxiosUnprocessableEntityError<FormError>(error: unknown): erro
   return isAxiosError(error) && error.response?.status === HttpStatusCode.UnprocessableEntity
 }
 
-export function formatCurrency(currency?: number) {
-  if (currency === undefined) {
-    return ''
-  }
+export function formatCurrency(currency: number) {
   return new Intl.NumberFormat('de-DE').format(currency)
 }
 
-export function formatNumberToSocialStyle(value?: number) {
-  if (value === undefined) {
-    return ''
-  }
+export function formatNumberToSocialStyle(value: number) {
   return new Intl.NumberFormat('en', {
     notation: 'compact',
     maximumSignificantDigits: 1
   })
     .format(value)
     .replace('.', ',')
+}
+
+export function rateSale(original: number, sale: number) {
+  return Math.round(((original - sale) / original) * 100) + '%'
 }
