@@ -3,7 +3,6 @@ import path from '../../../../constants/path'
 import Button from '../../../../Components/Button'
 
 import { Category } from '../../../../types/category.type'
-import { queryConfig } from '../../ProductList'
 import classNames from 'classnames'
 import InputNumber from '../../../../Components/InputNumber'
 import { useForm, Controller } from 'react-hook-form'
@@ -13,6 +12,7 @@ import { toast } from 'react-toastify'
 import { NoUndefinedField } from '../../../../types/utils.type'
 import RatingStars from '../../../RatingStars'
 import { omit } from 'lodash'
+import { queryConfig } from '../../../../hooks/useQueryConfig'
 
 interface Props {
   categories: Category[]

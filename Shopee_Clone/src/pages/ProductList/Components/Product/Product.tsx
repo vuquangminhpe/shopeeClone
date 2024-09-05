@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Product as Products } from '../../../../types/product.type'
-import { formatCurrency, formatNumberToSocialStyle, rateSale } from '../../../../utils/utils'
+import { formatCurrency, formatNumberToSocialStyle, generateNameId, rateSale } from '../../../../utils/utils'
 import ProductRating from '../ProductRating'
 import path from '../../../../constants/path'
 
@@ -9,7 +9,7 @@ interface Props {
 }
 export default function Product({ product }: Props) {
   return (
-    <Link to={`${path.home}${product._id}`}>
+    <Link to={`${path.home}${generateNameId({ name: product.name, id: product._id })}`}>
       <div className='relative hover:-translate-y-1 hover:shadow-md duration-100 transition-transform '>
         <div className='bg-yellow-300 w-[45px] absolute right-0 top-0'>
           <p className='text-orange p-1'>{rateSale(product.price_before_discount, product.price)}</p>

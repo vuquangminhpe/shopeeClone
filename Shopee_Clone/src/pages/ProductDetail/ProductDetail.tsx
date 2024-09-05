@@ -1,47 +1,80 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+import ProductRating from '../ProductList/Components/ProductRating'
+import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import productApi from '../../api/product.api'
-import ProductRating from '../ProductList/Components/ProductRating'
-import { formatCurrency, formatNumberToSocialStyle, rateSale } from '../../utils/utils'
-import InputNumber from '../../Components/InputNumber'
-import { useEffect, useMemo, useState } from 'react'
-import { Product } from '../../types/product.type'
-
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Product as Products, ProductListConfig } from '../../types/product.type'
+import DOMPurify from 'dompurify'
+import Product from '../ProductList/Components/Product'
+import QuantityController from '../../Components/QuantityController'
 export default function ProductDetail() {
-  const { id } = useParams()
-
-  const { data: productDetailData } = useQuery({
+  const [buyCount, setBuyCount] = useState(1)
+  const { nameId } = useParams()
+  const id = getIdFromNameId(nameId as string)
+  const { data: productData } = useQuery({
     queryKey: ['product', id],
     queryFn: () => productApi.getProductDetail(id as string)
   })
-  const product = productDetailData?.data.data
-
+  const product = productData?.data.data
+  const queryConfig: ProductListConfig = { limit: '20', page: '1', category: product?.category._id }
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImages, setActiveImages] = useState('')
-
+  const imageRef = useRef<HTMLImageElement>(null)
   useEffect(() => {
     if (product) {
       setActiveImages(product.image)
     }
   }, [product])
+  const { data: productsData } = useQuery({
+    queryKey: ['product', queryConfig],
+    queryFn: () => productApi.getProduct(queryConfig),
+    enabled: Boolean(product),
+    staleTime: Infinity
+  })
   const currentImages = useMemo(
     () => (product ? product.images.slice(...currentIndexImages) : []),
     [product, currentIndexImages]
   )
-
   const mouseImages = (img: string) => {
-    if (product) setActiveImages(img)
+    setActiveImages(img)
   }
   const prev = () => {
+    console.log(currentIndexImages[0])
+
     if (currentIndexImages[0] > 0) {
       setCurrentIndexImages((prev) => [prev[0] - 1, prev[1] - 1])
     }
   }
   const next = () => {
-    if (currentIndexImages[1] < (product as Product).images.length) {
+    console.log(currentIndexImages[1])
+
+    if (currentIndexImages[1] < (product as Products)?.images.length) {
       setCurrentIndexImages((prev) => [prev[0] + 1, prev[1] + 1])
     }
+  }
+  const handleZoom = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const image = imageRef.current as HTMLImageElement
+    const { naturalWidth, naturalHeight } = image
+    //cách 1 : khi xử lí được bubble event
+    // const { offsetX, offsetY } = event.nativeEvent
+    //cách 2: Khi không xử lí được bubble event\
+    const offsetX = event.pageX - (rect.x - window.scrollX)
+    const offsetY = event.pageY - (rect.y - window.scrollY)
+    const top = offsetY * (1 - naturalHeight / rect.height)
+    const left = offsetX * (1 - naturalWidth / rect.width)
+    image.style.width = naturalWidth + 'px'
+    image.style.height = naturalHeight + 'px'
+    image.style.maxWidth = 'unset'
+    image.style.top = top + 'px'
+    image.style.left = left + 'px'
+  }
+  const handleRemoveZoom = () => {
+    imageRef.current?.removeAttribute('style')
+  }
+  const handleBuyCount = (value: number) => {
+    setBuyCount(value)
   }
   if (!product) return null
   return (
@@ -50,8 +83,17 @@ export default function ProductDetail() {
         <div className='container'>
           <div className='grid grid-cols-12 gap-9'>
             <div className='col-span-5'>
-              <div className='relative w-full shadow pt-[100%]'>
-                <img src={activeImages} alt='' className='absolute top-0 left-0 h-full w-full bg-white object-cover' />
+              <div
+                className='relative w-full shadow pt-[100%] overflow-hidden'
+                onMouseMove={handleZoom}
+                onMouseLeave={handleRemoveZoom}
+              >
+                <img
+                  src={activeImages}
+                  alt=''
+                  className='absolute pointer-events-none  top-0 left-0 h-full w-full bg-white object-cover'
+                  ref={imageRef}
+                />
               </div>
               <div className='relative mt-4 grid grid-cols-5 gap-1'>
                 <button
@@ -123,38 +165,13 @@ export default function ProductDetail() {
               </div>
               <div className='mt-8 flex items-center'>
                 <div className='capitalize text-gray-500'>Số lượng</div>
-                <div className='ml-10 flex items-center'>
-                  <button className='flex h-8 w-8 items-center justify-center rounded-l-sm border border-gray-300 text-gray-600'>
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      strokeWidth={1.5}
-                      stroke='currentColor'
-                      className='size-4'
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' d='M5 12h14' />
-                    </svg>
-                  </button>
-                  <InputNumber
-                    classNameError='hidden'
-                    value={1}
-                    className=''
-                    classNameInput='h-8 w-14 border-t border-b border-gray-300 p-1 text-center outline-none'
-                  />
-                  <button className='flex h-8 w-8 items-center justify-center rounded-l-sm border border-gray-300 text-gray-600'>
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      fill='none'
-                      viewBox='0 0 24 24'
-                      strokeWidth={1.5}
-                      stroke='currentColor'
-                      className='size-4'
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' d='M12 4.5v15m7.5-7.5h-15' />
-                    </svg>
-                  </button>
-                </div>
+                <QuantityController
+                  onIncrease={handleBuyCount}
+                  onDecrease={handleBuyCount}
+                  onType={handleBuyCount}
+                  max={product.quantity}
+                  value={buyCount}
+                />
                 <div className='ml-6 textsm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className='mt-8 flex items-center'>
@@ -177,7 +194,21 @@ export default function ProductDetail() {
       <div className='mt-8 bg-white p-4 shadow'>
         <div className='container'>
           <div className='rounded bg-gray-50 p-4 text-lg capitalize text-slate-700'>Mô tả sản phẩm</div>
-          <div className='mx-5 mt-12 mb-4 text-sm leading-loose'></div>
+          <div className='mx-5 mt-12 mb-4 text-sm leading-loose'>
+            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}></div>
+          </div>
+        </div>
+      </div>
+      <div className='bg-gray-100 py-6'>
+        <div className='container'>
+          <div className='text-black'>Sản phẩm yêu thích</div>
+          <div className='mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
+            {productsData?.data.data.products.map((product) => (
+              <div className='col-span-1' key={product._id}>
+                <Product product={product} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

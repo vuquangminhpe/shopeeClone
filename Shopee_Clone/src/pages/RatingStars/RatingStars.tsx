@@ -1,6 +1,6 @@
 import { createSearchParams, useNavigate } from 'react-router-dom'
 import path from '../../constants/path'
-import { queryConfig } from '../ProductList/ProductList'
+import { queryConfig } from '../../hooks/useQueryConfig'
 interface Props {
   queryConfig: queryConfig
 }
@@ -56,7 +56,7 @@ export default function RatingStars({ queryConfig }: Props) {
                     )
                   }
                   return (
-                    <svg viewBox='0 0 9.5 8' className='mr-1 h-4 w-4' key={index}>
+                    <svg viewBox='0 0 9.5 8' className='mr-1 h-4 w-4' key={`rating-${index}`}>
                       <defs>
                         <polygon
                           id='ratingStar'

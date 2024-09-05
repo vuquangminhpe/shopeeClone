@@ -1,10 +1,10 @@
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
-import { queryConfig } from '../../ProductList'
 import path from '../../../../constants/path'
 import classNames from 'classnames'
 import { order, sortBy } from '../../../../constants/product'
 import { ProductListConfig } from '../../../../types/product.type'
 import { omit } from 'lodash'
+import { queryConfig } from '../../../../hooks/useQueryConfig'
 
 interface Props {
   queryParamsConfig: queryConfig
