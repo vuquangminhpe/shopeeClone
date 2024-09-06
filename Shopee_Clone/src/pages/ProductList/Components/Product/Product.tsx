@@ -29,10 +29,10 @@ export default function Product({ product }: Props) {
             </div>
             <ul className='my-3'>
               <li className='py-1 list-none'>
-                <Link to={''} className='flex items-center text-sm'>
+                <div className='flex items-center text-sm'>
                   <ProductRating rating={product.rating} />
                   <span className='text-xs ml-3'>{formatNumberToSocialStyle(product.sold)} đã bán</span>
-                </Link>
+                </div>
               </li>
             </ul>
             <div className='text-xs'>Hà Nội</div>

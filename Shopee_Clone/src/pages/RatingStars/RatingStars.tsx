@@ -21,7 +21,7 @@ export default function RatingStars({ queryConfig }: Props) {
       {Array(5)
         .fill(0)
         .map((_, index) => (
-          <li key={index} className='py-1 pl-2 list-none'>
+          <li key={`mounting-${index}`} className='py-1 pl-2 list-none'>
             <div className='flex items-center text-sm' onClick={() => handleFilterStar(5 - index)}>
               {Array(5)
                 .fill(0)

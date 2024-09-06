@@ -10,8 +10,12 @@ import { useForm } from 'react-hook-form'
 import { Schema, schema } from '../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { omit } from 'lodash'
+import { useQuery } from '@tanstack/react-query'
+import { purchaseStatus } from '../../constants/purchase'
+import purchaseApi from '../../api/purchases.api'
 type FormData = Pick<Schema, 'name'>
 const nameSchema = schema.pick(['name'])
+const MAX_PURCHASES = 5
 export default function Header() {
   const navigate = useNavigate()
   const queryConfig = useQueryConfig()
@@ -44,7 +48,11 @@ export default function Header() {
       search: createSearchParams(config).toString()
     })
   })
-
+  const { data: purchasesInCartData } = useQuery({
+    queryKey: ['purchases', { status: purchaseStatus.inCart }],
+    queryFn: () => purchaseApi.getPurchases({ status: purchaseStatus.inCart })
+  })
+  const purchaseInCart = purchasesInCartData?.data.data
   return (
     <div className='pb-5 pt-2 bg-[linear-gradient(-180deg,#f53d2d,#f63)]'>
       <div className='container'>
@@ -200,114 +208,51 @@ export default function Header() {
                     />
                   </svg>
                   <div className='bg-white rounded-full size-5 text-center leading-5 absolute left-6 -top-[10px]'>
-                    6
+                    {purchaseInCart?.length}
                   </div>
                 </div>
               }
               renderPopover={
                 <div className='bg-white relative shadow-md rounded-sm border border-gray-200 max-w-[400px] text-sm'>
-                  {isAuthenticated && (
+                  {purchaseInCart?.slice(0, MAX_PURCHASES).map((purchases) => (
                     <div className='p-2'>
-                      <div className='text-gray-400 capitalize'>Sản phẩm mới thêm</div>
                       <div className='mt-5'>
                         <div className='mt-4 flex'>
                           <div className='flex-shrink-0'>
-                            <img
-                              className='size-5 object-cover'
-                              src='https://cf.shopee.vn/file/sg-11134201-22110-s3ycuwtvgvjvb4_tn'
-                              alt=''
-                            />
+                            <img className='size-5 object-cover' src={purchases.product.image} alt='' />
                           </div>
                           <div className='flex-grow ml-2 overflow-hidden'>
-                            <div className='truncate'>
-                              [LIFEMCBP2 -12% đơn 250k] Bộ Nồi Inox 3 đáy SUNHOUSE SH334 16,20,24 cm
-                            </div>
+                            <div className='truncate'>{purchases.product.name}</div>
                           </div>
                           <div className='ml-2 flex-shrink-0'>
-                            <span className='text-orange'>469.000$</span>
+                            <span className='text-orange'>đ{purchases.price}</span>
                           </div>
                         </div>
-                        <div className='mt-4 flex'>
-                          <div className='flex-shrink-0'>
-                            <img
-                              className='size-5 object-cover'
-                              src='https://cf.shopee.vn/file/sg-11134201-22110-s3ycuwtvgvjvb4_tn'
-                              alt=''
-                            />
-                          </div>
-                          <div className='flex-grow ml-2 overflow-hidden'>
-                            <div className='truncate'>
-                              [LIFEMCBP2 -12% đơn 250k] Bộ Nồi Inox 3 đáy SUNHOUSE SH334 16,20,24 cm
-                            </div>
-                          </div>
-                          <div className='ml-2 flex-shrink-0'>
-                            <span className='text-orange'>469.000$</span>
-                          </div>
-                        </div>
-                        <div className='mt-4 flex'>
-                          <div className='flex-shrink-0'>
-                            <img
-                              className='size-5 object-cover'
-                              src='https://cf.shopee.vn/file/sg-11134201-22110-s3ycuwtvgvjvb4_tn'
-                              alt=''
-                            />
-                          </div>
-                          <div className='flex-grow ml-2 overflow-hidden'>
-                            <div className='truncate'>
-                              [LIFEMCBP2 -12% đơn 250k] Bộ Nồi Inox 3 đáy SUNHOUSE SH334 16,20,24 cm
-                            </div>
-                          </div>
-                          <div className='ml-2 flex-shrink-0'>
-                            <span className='text-orange'>469.000$</span>
-                          </div>
-                        </div>
-                        <div className='mt-4 flex'>
-                          <div className='flex-shrink-0'>
-                            <img
-                              className='size-5 object-cover'
-                              src='https://cf.shopee.vn/file/sg-11134201-22110-s3ycuwtvgvjvb4_tn'
-                              alt=''
-                            />
-                          </div>
-                          <div className='flex-grow ml-2 overflow-hidden'>
-                            <div className='truncate'>
-                              [LIFEMCBP2 -12% đơn 250k] Bộ Nồi Inox 3 đáy SUNHOUSE SH334 16,20,24 cm
-                            </div>
-                          </div>
-                          <div className='ml-2 flex-shrink-0'>
-                            <span className='text-orange'>469.000$</span>
-                          </div>
-                        </div>
-                        <div className='mt-4 flex'>
-                          <div className='flex-shrink-0'>
-                            <img
-                              className='size-5 object-cover'
-                              src='https://cf.shopee.vn/file/sg-11134201-22110-s3ycuwtvgvjvb4_tn'
-                              alt=''
-                            />
-                          </div>
-                          <div className='flex-grow ml-2 overflow-hidden'>
-                            <div className='truncate'>
-                              [LIFEMCBP2 -12% đơn 250k] Bộ Nồi Inox 3 đáy SUNHOUSE SH334 16,20,24 cm
-                            </div>
-                          </div>
-                          <div className='ml-2 flex-shrink-0'>
-                            <span className='text-orange'>469.000$</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className='flex mt-6 items-center justify-between'>
-                        <div className='capitalize text-xs text-gray-500'>Thêm vào giỏ hàng</div>
-                        <button className='capitalize bg-orange hover:bg-opacity-90 rounded-sm px-4 py-2 text-white'>
-                          ĐẶT HÀNG NGAY
-                        </button>
                       </div>
                     </div>
-                  )}
+                  ))}
+
                   {!isAuthenticated && (
                     <div className='p-9'>
                       <img src={icon} className='size-52 mb-1 rounded-full' alt='' />
-                      <div className='capitalize text-center text-xs text-gray-500'>Không có sản phẩm</div>
+                      <div className='capitalize text-center text-xs text-gray-500'>Hãy đăng nhập để thêm sản phẩm</div>
+                    </div>
+                  )}
+                  {!purchaseInCart && isAuthenticated && (
+                    <div className='p-9'>
+                      <img src={icon} className='size-52 mb-1 rounded-full' alt='' />
+                      <div className='capitalize text-center text-xs text-gray-500'>Chưa có sản phẩm</div>
+                    </div>
+                  )}
+                  {isAuthenticated && purchaseInCart && (
+                    <div className='flex mt-6 items-center justify-between'>
+                      <div className='capitalize text-xs text-gray-500 ml-1'>
+                        {MAX_PURCHASES < purchaseInCart.length ? purchaseInCart.length - MAX_PURCHASES + ' ' : ' '}Thêm
+                        vào giỏ hàng
+                      </div>
+                      <button className='capitalize bg-orange hover:bg-opacity-90 rounded-sm px-4 py-2 text-white'>
+                        ĐẶT HÀNG NGAY
+                      </button>
                     </div>
                   )}
                 </div>

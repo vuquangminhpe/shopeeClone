@@ -17,11 +17,10 @@ class Http {
         'Content-Type': 'application/json'
       }
     })
-    this.instance.interceptors.response.use(
+    this.instance.interceptors.request.use(
       (config) => {
         if (this.accessToken && config.headers) {
           config.headers.authorization = this.accessToken
-          return config
         }
         return config
       },
@@ -29,15 +28,20 @@ class Http {
         return Promise.reject(error)
       }
     )
+
     this.instance.interceptors.response.use(
       (response) => {
         const { url } = response.config
         if (url === path.register || url === path.login) {
           const data = response.data as AuthResponse
+          console.log(data)
+
           this.accessToken = data.data?.access_token
           saveAccessTokenToLS(this.accessToken)
           setProfileFromLS(data.data.user)
         } else if (url === '/logout') {
+          console.log('t')
+
           this.accessToken = ''
           clearLocalStorage()
         }

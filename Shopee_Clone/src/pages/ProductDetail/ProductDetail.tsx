@@ -1,13 +1,17 @@
 import ProductRating from '../ProductList/Components/ProductRating'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import productApi from '../../api/product.api'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Product as Products, ProductListConfig } from '../../types/product.type'
 import DOMPurify from 'dompurify'
 import Product from '../ProductList/Components/Product'
 import QuantityController from '../../Components/QuantityController'
+import purchaseApi from '../../api/purchases.api'
+import { toast } from 'react-toastify'
+import { queryClient } from '../../main'
+import { purchaseStatus } from '../../constants/purchase'
 export default function ProductDetail() {
   const [buyCount, setBuyCount] = useState(1)
   const { nameId } = useParams()
@@ -46,6 +50,9 @@ export default function ProductDetail() {
       setCurrentIndexImages((prev) => [prev[0] - 1, prev[1] - 1])
     }
   }
+  const addToCartMutation = useMutation({
+    mutationFn: (body: { product_id: string; buy_count: number }) => purchaseApi.AddToCart(body)
+  })
   const next = () => {
     console.log(currentIndexImages[1])
 
@@ -75,6 +82,17 @@ export default function ProductDetail() {
   }
   const handleBuyCount = (value: number) => {
     setBuyCount(value)
+  }
+  const handleAddToCart = () => {
+    addToCartMutation.mutate(
+      { buy_count: buyCount, product_id: product?._id as string },
+      {
+        onSuccess: (data) => {
+          toast.success(data.data.message)
+          queryClient.invalidateQueries({ queryKey: ['purchases', { status: purchaseStatus.inCart }] })
+        }
+      }
+    )
   }
   if (!product) return null
   return (
@@ -114,7 +132,7 @@ export default function ProductDetail() {
                 {currentImages.map((img) => {
                   const isActive = img === activeImages
                   return (
-                    <div className='relative w-full pt-[100%]' onMouseEnter={() => mouseImages(img)}>
+                    <div className='relative w-full pt-[100%]' onMouseEnter={() => mouseImages(img)} key={img}>
                       <img src={img} alt='' className='absolute top-0 left-0 h-full w-full bg-white object-cover' />
                       {isActive && <div className='absolute inset-0 border-2 border-orange'></div>}
                     </div>
@@ -175,7 +193,10 @@ export default function ProductDetail() {
                 <div className='ml-6 textsm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
               </div>
               <div className='mt-8 flex items-center'>
-                <button className='flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize text-orange shadow-sm hover:bg-orange/5'>
+                <button
+                  onClick={handleAddToCart}
+                  className='flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize text-orange shadow-sm hover:bg-orange/5'
+                >
                   <img
                     className='px-1 mr-2'
                     alt='icon-add-to-cart'
