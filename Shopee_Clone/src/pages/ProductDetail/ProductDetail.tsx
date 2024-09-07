@@ -1,9 +1,9 @@
 import ProductRating from '../ProductList/Components/ProductRating'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from '../../utils/utils'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import productApi from '../../api/product.api'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Product as Products, ProductListConfig } from '../../types/product.type'
 import DOMPurify from 'dompurify'
 import Product from '../ProductList/Components/Product'
@@ -12,14 +12,18 @@ import purchaseApi from '../../api/purchases.api'
 import { toast } from 'react-toastify'
 import { queryClient } from '../../main'
 import { purchaseStatus } from '../../constants/purchase'
+import { AppContext } from '../../Contexts/app.context'
+import path from '../../constants/path'
 export default function ProductDetail() {
   const [buyCount, setBuyCount] = useState(1)
   const { nameId } = useParams()
+  const navigate = useNavigate()
   const id = getIdFromNameId(nameId as string)
   const { data: productData } = useQuery({
     queryKey: ['product', id],
     queryFn: () => productApi.getProductDetail(id as string)
   })
+  const { isAuthenticated } = useContext(AppContext)
   const product = productData?.data.data
   const queryConfig: ProductListConfig = { limit: '20', page: '1', category: product?.category._id }
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
@@ -194,7 +198,7 @@ export default function ProductDetail() {
               </div>
               <div className='mt-8 flex items-center'>
                 <button
-                  onClick={handleAddToCart}
+                  onClick={() => (isAuthenticated ? handleAddToCart() : navigate(path.login))}
                   className='flex h-12 items-center justify-center rounded-sm border border-orange bg-orange/10 px-5 capitalize text-orange shadow-sm hover:bg-orange/5'
                 >
                   <img

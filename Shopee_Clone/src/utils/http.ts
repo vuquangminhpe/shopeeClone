@@ -34,8 +34,6 @@ class Http {
         const { url } = response.config
         if (url === path.register || url === path.login) {
           const data = response.data as AuthResponse
-          console.log(data)
-
           this.accessToken = data.data?.access_token
           saveAccessTokenToLS(this.accessToken)
           setProfileFromLS(data.data.user)

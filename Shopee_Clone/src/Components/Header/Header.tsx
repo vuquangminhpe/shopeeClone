@@ -13,6 +13,8 @@ import { omit } from 'lodash'
 import { useQuery } from '@tanstack/react-query'
 import { purchaseStatus } from '../../constants/purchase'
 import purchaseApi from '../../api/purchases.api'
+import { formatCurrency } from '../../utils/utils'
+import { queryClient } from '../../main'
 type FormData = Pick<Schema, 'name'>
 const nameSchema = schema.pick(['name'])
 const MAX_PURCHASES = 5
@@ -25,6 +27,7 @@ export default function Header() {
   const { profile, isAuthenticated, setIsAuthenticated, setProfile } = useContext(AppContext)
 
   const handleLogout = () => {
+    queryClient.removeQueries({ queryKey: ['purchases', { status: purchaseStatus.inCart }] })
     setIsAuthenticated(false)
     clearLocalStorage()
     setProfile(null)
@@ -50,7 +53,8 @@ export default function Header() {
   })
   const { data: purchasesInCartData } = useQuery({
     queryKey: ['purchases', { status: purchaseStatus.inCart }],
-    queryFn: () => purchaseApi.getPurchases({ status: purchaseStatus.inCart })
+    queryFn: () => purchaseApi.getPurchases({ status: purchaseStatus.inCart }),
+    enabled: Boolean(isAuthenticated)
   })
   const purchaseInCart = purchasesInCartData?.data.data
   return (
@@ -208,29 +212,30 @@ export default function Header() {
                     />
                   </svg>
                   <div className='bg-white rounded-full size-5 text-center leading-5 absolute left-6 -top-[10px]'>
-                    {purchaseInCart?.length}
+                    {purchaseInCart?.length || 0}
                   </div>
                 </div>
               }
               renderPopover={
                 <div className='bg-white relative shadow-md rounded-sm border border-gray-200 max-w-[400px] text-sm'>
-                  {purchaseInCart?.slice(0, MAX_PURCHASES).map((purchases) => (
-                    <div className='p-2'>
-                      <div className='mt-5'>
-                        <div className='mt-4 flex'>
-                          <div className='flex-shrink-0'>
-                            <img className='size-5 object-cover' src={purchases.product.image} alt='' />
-                          </div>
-                          <div className='flex-grow ml-2 overflow-hidden'>
-                            <div className='truncate'>{purchases.product.name}</div>
-                          </div>
-                          <div className='ml-2 flex-shrink-0'>
-                            <span className='text-orange'>đ{purchases.price}</span>
+                  {isAuthenticated &&
+                    purchaseInCart?.slice(0, MAX_PURCHASES).map((purchases) => (
+                      <div className='p-2' key={purchases._id}>
+                        <div className='mt-5'>
+                          <div className='mt-4 flex'>
+                            <div className='flex-shrink-0'>
+                              <img className='size-5 object-cover' src={purchases.product.image} alt='' />
+                            </div>
+                            <div className='flex-grow ml-2 overflow-hidden'>
+                              <div className='truncate'>{purchases.product.name}</div>
+                            </div>
+                            <div className='ml-2 flex-shrink-0'>
+                              <span className='text-orange'>đ{formatCurrency(purchases.price)}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
 
                   {!isAuthenticated && (
                     <div className='p-9'>
@@ -246,10 +251,10 @@ export default function Header() {
                   )}
                   {isAuthenticated && purchaseInCart && (
                     <div className='flex mt-6 items-center justify-between'>
-                      <div className='capitalize text-xs text-gray-500 ml-1'>
+                      <Link to={path.cart} className='capitalize text-xs text-gray-500 ml-1'>
                         {MAX_PURCHASES < purchaseInCart.length ? purchaseInCart.length - MAX_PURCHASES + ' ' : ' '}Thêm
                         vào giỏ hàng
-                      </div>
+                      </Link>
                       <button className='capitalize bg-orange hover:bg-opacity-90 rounded-sm px-4 py-2 text-white'>
                         ĐẶT HÀNG NGAY
                       </button>
