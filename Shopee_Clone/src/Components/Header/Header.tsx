@@ -86,7 +86,7 @@ export default function Header() {
                 </div>
               }
               renderPopover={
-                <div className='bg-white relative shadow-md rounded-sm border border-gray-200 max-w-[400px] text-sm'>
+                <div className='bg-white relative shadow-md rounded-sm border border-gray-200  max-w-[400px] text-sm'>
                   {isAuthenticated &&
                     purchaseInCart?.slice(0, MAX_PURCHASES).map((purchases) => (
                       <div className='p-2' key={purchases._id}>

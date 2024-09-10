@@ -73,26 +73,42 @@ export default function Login() {
         }
       })
 
+      if (!userInfoResponse.ok) {
+        throw new Error('Failed to fetch user info')
+      }
+
       const userInfo = await userInfoResponse.json()
-      console.log(userInfo)
 
       setProfile(userInfo)
       setProfileFromLS(userInfo)
       setIsAuthenticated(true)
       saveAccessTokenToLS(`Bearer ${tokenResponse.access_token}`)
     } catch (error) {
+      console.error('Error fetching user info', error)
       toast.error('Error fetching user info')
     }
   }
 
   const responseFacebook = (response: any) => {
-    console.log(response)
-    setIsAuthenticated(true)
-    setProfile(response)
-    setProfileFromLS(response)
+    if (!response || !response.accessToken) {
+      console.error('No access token found in Facebook response')
+      toast.error('Error logging in with Facebook')
+    }
 
-    saveAccessTokenToLS(`Bearer ${response.accessToken}`)
+    try {
+      console.log('Facebook response:', response) // Debug thông tin response
+
+      setIsAuthenticated(true)
+      setProfile(response)
+      setProfileFromLS(response)
+
+      saveAccessTokenToLS(`Bearer ${response.accessToken}`)
+    } catch (error) {
+      console.error('Error processing Facebook login', error)
+      toast.error('Error processing Facebook login')
+    }
   }
+
   const login = useGoogleLogin({
     onSuccess: handleLoginSuccess,
     onError: (error) => console.log('Login Failed:', error)

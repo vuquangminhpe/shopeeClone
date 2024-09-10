@@ -1,26 +1,29 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import purchaseApi from '../../api/purchases.api'
 import { purchaseStatus } from '../../constants/purchase'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import path from '../../constants/path'
 import { formatCurrency, generateNameId } from '../../utils/utils'
 import QuantityController from '../../Components/QuantityController'
 import Button from '../../Components/Button'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Purchase } from '../../types/purchase.type'
 import { produce } from 'immer'
 import { keyBy } from 'lodash'
-interface ExtendedPurchases extends Purchase {
+import { AppContext } from '../../Contexts/app.context'
+import { toast } from 'react-toastify'
+export interface ExtendedPurchases extends Purchase {
   disabled: boolean
   checked: boolean
 }
 export default function Cart() {
-  const [extendedPurchases, setExtendedPurchases] = useState<ExtendedPurchases[]>([])
-  const { data: purchasesInCartData, refetch } = useQuery({
+  const location = useLocation()
+  const { extendedPurchases, setExtendedPurchases } = useContext(AppContext)
+  const { data: purchaseInCartData, refetch } = useQuery({
     queryKey: ['purchases', { status: purchaseStatus.inCart }],
     queryFn: () => purchaseApi.getPurchases({ status: purchaseStatus.inCart })
   })
-  const purchasesInCart = purchasesInCartData?.data.data
+  const purchasesInCart = purchaseInCartData?.data.data
   const isAllChecked = extendedPurchases.every((purchase) => purchase.checked)
   const purchasesInCartChecked = extendedPurchases.filter((purchase) => purchase.checked)
   const purchasesInCartCheckedCount = purchasesInCartChecked.length
@@ -30,52 +33,42 @@ export default function Cart() {
   const purchasesInCartCheckedSavingPrice_discount = purchasesInCartChecked.reduce((result, current) => {
     return result + (current.product.price_before_discount - current.product.price) * current.buy_count
   }, 0)
+  const dataLocation = location.state?.purchasesId
+  console.log(dataLocation)
+
   useEffect(() => {
     setExtendedPurchases((prev) => {
-      const purchasesInCartObject = keyBy(prev, '_id')
+      const purchaseInCartObject = keyBy(prev, '_id')
       return (
-        purchasesInCart?.map((purchase) => ({
-          ...purchase,
-          disabled: false,
-          checked: Boolean(purchasesInCartObject[purchase._id]?.checked)
-        })) || []
+        purchasesInCart?.map((purchase) => {
+          const purchasesIdFromLocation = dataLocation === purchase._id
+          return {
+            ...purchase,
+            disabled: false,
+            checked: purchasesIdFromLocation || Boolean(purchaseInCartObject[purchase._id]?.checked)
+          }
+        }) || []
       )
     })
   }, [purchasesInCart])
-  const updatePurchasesMutation = useMutation({
+  const updatePurchaseMutation = useMutation({
     mutationFn: purchaseApi.updatePurchase,
     onSuccess: () => {
       refetch()
     }
   })
-  const DeleteMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: purchaseApi.deletePurchase,
     onSuccess: () => {
       refetch()
     }
   })
-  const BuyProductMutation = useMutation({
+  const buyProductsMutation = useMutation({
     mutationFn: purchaseApi.buyProducts,
     onSuccess: () => {
       refetch()
     }
   })
-  const handleChecked = (purchaseIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    setExtendedPurchases(
-      produce((draft) => {
-        draft[purchaseIndex].checked = event.target.checked
-      })
-    )
-  }
-
-  const handleOnType = (purchaseIndex: number) => (value: number) => {
-    setExtendedPurchases(
-      produce((draft) => {
-        draft[purchaseIndex].buy_count = value
-      })
-    )
-  }
-
   const handleCheckAll = () => {
     setExtendedPurchases((prev) =>
       prev.map((purchase) => ({
@@ -84,36 +77,47 @@ export default function Cart() {
       }))
     )
   }
-  const handleDelete = (purchaseIndex: number) => () => {
-    const productId = extendedPurchases[purchaseIndex]._id
-    DeleteMutation.mutate([productId])
+  const handleChecked = (purchaseIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setExtendedPurchases(
+      produce((draft) => {
+        draft[purchaseIndex].checked = event.target.checked
+      })
+    )
   }
-  const handleDeleteMany = () => {
-    const productIds = extendedPurchases.map((purchase) => purchase.product._id)
-    DeleteMutation.mutate(productIds)
-  }
-  const handleBuyProduct = () => {
-    if (purchasesInCartChecked.length > 0) {
-      const body = extendedPurchases.map((purchase) => ({
-        product_id: purchase.product._id,
-        buy_count: purchase.buy_count
-      }))
-      BuyProductMutation.mutate(body)
-    }
+  const handleOnType = (purchaseIndex: number) => (value: number) => {
+    setExtendedPurchases(
+      produce((draft) => {
+        draft[purchaseIndex].buy_count = value
+      })
+    )
   }
   const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
-    console.log('t')
-
     if (enable) {
-      console.log('a')
-
-      const purchase = extendedPurchases[purchaseIndex]
+      const purchaseId = extendedPurchases[purchaseIndex].product._id
       setExtendedPurchases(
         produce((draft) => {
           draft[purchaseIndex].disabled = true
         })
       )
-      updatePurchasesMutation.mutate({ product_id: purchase.product._id, buy_count: value })
+      updatePurchaseMutation.mutate({ product_id: purchaseId, buy_count: value })
+    }
+  }
+
+  const handleDelete = (purchaseIndex: number) => () => {
+    const productId = extendedPurchases[purchaseIndex]._id
+    deleteMutation.mutate([productId])
+  }
+  const handleDeleteMany = () => {
+    const productIds = extendedPurchases?.map((purchase) => purchase._id)
+    deleteMutation.mutate(productIds)
+  }
+  const handleBuyProduct = () => {
+    if (purchasesInCartChecked.length > 0) {
+      const body = purchasesInCartChecked.map((purchase) => ({
+        product_id: purchase.product._id,
+        buy_count: purchase.buy_count
+      }))
+      buyProductsMutation.mutate(body)
     }
   }
   return (
@@ -251,7 +255,11 @@ export default function Cart() {
               </div>
               <div className='flex items-center justify-end text-sm'>
                 <div className='text-gray-500'>Tiết kiệm</div>
-                <div className='ml-6 text-orange'>{formatCurrency(purchasesInCartCheckedSavingPrice_discount)}</div>
+                <div className='ml-6 text-orange'>
+                  {(purchasesInCartCheckedSavingPrice_discount > 0 &&
+                    formatCurrency(purchasesInCartCheckedSavingPrice_discount)) ||
+                    'đ0'}
+                </div>
               </div>
             </div>
             <Button

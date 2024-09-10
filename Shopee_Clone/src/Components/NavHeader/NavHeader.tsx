@@ -3,12 +3,13 @@ import path from '../../constants/path'
 import Popover from '../Popover'
 import { useContext } from 'react'
 import { AppContext } from '../../Contexts/app.context'
-import { queryClient } from '../../main'
 import { clearLocalStorage } from '../../utils/auth'
 import { purchaseStatus } from '../../constants/purchase'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function NavHeader() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { profile, isAuthenticated, setIsAuthenticated, setProfile } = useContext(AppContext)
   const handleLogout = () => {
     queryClient.removeQueries({ queryKey: ['purchases', { status: purchaseStatus.inCart }] })
