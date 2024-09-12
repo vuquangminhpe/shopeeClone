@@ -56,7 +56,7 @@ export default function RatingStars({ queryConfig }: Props) {
                     )
                   }
                   return (
-                    <svg viewBox='0 0 9.5 8' className='mr-1 h-4 w-4' key={`rating-${index}`}>
+                    <svg viewBox='0 0 9.5 8' className='mr-1 h-4 w-4' key={`rating-`}>
                       <defs>
                         <polygon
                           id='ratingStar'

@@ -5,9 +5,10 @@ export interface User extends UserFacebook, UserGoogle {
   roles: Role[]
   email: string
   name: string
-  date_of_birth: null
-  address: string
-  phone: string
+  date_of_birth?: string
+  avatar?: string
+  address?: string
+  phone?: string
   createdAt: string
   updateAt: string
   __v: number
