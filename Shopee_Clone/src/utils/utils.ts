@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios'
 import HttpStatusCode from '../constants/httpStatusCode.enum'
-
+import config from '../constants/config'
+import userImages from '../assets/user.svg'
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   return axios.isAxiosError(error)
 }
@@ -37,3 +38,6 @@ export const getIdFromNameId = (nameId: string) => {
 export function rateSale(original: number, sale: number) {
   return Math.round(((original - sale) / original) * 100) + '%'
 }
+
+export const getAvatarUrl = (avatarName?: string) =>
+  avatarName ? `${config.BASEUrl}/images/${avatarName}` : userImages

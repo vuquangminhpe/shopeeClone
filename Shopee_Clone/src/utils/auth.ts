@@ -15,6 +15,7 @@ export const getAccessTokenFromLS = () => localStorage.getItem('access_token') |
 
 export const getProfileFormLS = () => {
   const result = localStorage.getItem('profile')
+
   return result ? JSON.parse(result) : null
 }
 

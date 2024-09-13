@@ -34,7 +34,6 @@ export default function Cart() {
     return result + (current.product.price_before_discount - current.product.price) * current.buy_count
   }, 0)
   const dataLocation = location.state?.purchasesId
-  console.log(dataLocation)
 
   useEffect(() => {
     setExtendedPurchases((prev) => {
@@ -60,13 +59,19 @@ export default function Cart() {
   const deleteMutation = useMutation({
     mutationFn: purchaseApi.deletePurchase,
     onSuccess: () => {
-      refetch()
+      refetch(),
+        toast.success('Xóa đơn hàng thành công', {
+          position: 'top-center'
+        })
     }
   })
   const buyProductsMutation = useMutation({
     mutationFn: purchaseApi.buyProducts,
     onSuccess: () => {
       refetch()
+      toast.success('Mua hàng thành công', {
+        position: 'top-center'
+      })
     }
   })
   const handleCheckAll = () => {

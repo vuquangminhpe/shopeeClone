@@ -40,6 +40,8 @@ export default function Login() {
     loginAccountMutation.mutate(data, {
       onSuccess: (data) => {
         setProfile(data.data.data.user)
+        console.log('dataaaaaaaaa', data.data)
+
         setIsAuthenticated(true)
         navigate(path.home)
       },

@@ -6,6 +6,7 @@ import { AppContext } from '../../Contexts/app.context'
 import { clearLocalStorage } from '../../utils/auth'
 import { purchaseStatus } from '../../constants/purchase'
 import { useQueryClient } from '@tanstack/react-query'
+import { getAvatarUrl } from '../../utils/utils'
 
 export default function NavHeader() {
   const navigate = useNavigate()
@@ -68,15 +69,7 @@ export default function NavHeader() {
             {isAuthenticated && (
               <div className='flex items-center py-1 cursor-pointer ml-6'>
                 <div className='w-6 h-6 mr-2 flex-shrink-0'>
-                  <img
-                    src={
-                      profile?.picture !== undefined
-                        ? profile?.picture
-                        : 'https://cf.shopee.vn/file/d04ea22afab6e6d250a370d7ccc2e675_tn'
-                    }
-                    alt=''
-                    className='w-full h-full object-cover rounded-full'
-                  />
+                  <img src={getAvatarUrl(profile?.avatar)} alt='' className='w-full h-full object-cover rounded-full' />
                 </div>
                 <div className='text-white hover:text-gray-300 text-sm'>
                   {profile?.name == null ? profile?.email : profile?.name}

@@ -3,15 +3,13 @@ type Role = 'User' | 'Admin'
 export interface User extends UserFacebook, UserGoogle {
   _id: string
   roles: Role[]
-  email: string
   name: string
-  date_of_birth?: string
+  date_of_birth: string
   avatar?: string
   address?: string
   phone?: string
   createdAt: string
   updateAt: string
-  __v: number
 }
 
 export interface UserFacebook {
@@ -23,7 +21,7 @@ export interface UserFacebook {
   name: string
   signedRequest: string
   userID: string
-  email?: string
+  email: string
 }
 
 export interface UserGoogle {
