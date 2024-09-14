@@ -19,6 +19,7 @@ export default function NavHeader() {
     setProfile(null)
     navigate(path.home)
   }
+
   return (
     <div className='flex justify-end'>
       <Popover

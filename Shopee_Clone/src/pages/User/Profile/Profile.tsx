@@ -9,91 +9,101 @@ import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import DateSelect from '../../../Components/DateSelect'
 import { toast } from 'react-toastify'
-import { getAvatarUrl } from '../../../utils/utils'
+import { getAvatarUrl, isAxiosUnprocessableEntityError } from '../../../utils/utils'
+import { setProfileFromLS } from '../../../utils/auth'
+import { ErrorResponse } from '../../../types/utils.type'
+import config from '../../../constants/config'
 type FormData = Pick<UserSchema, 'name' | 'address' | 'phone' | 'date_of_birth' | 'avatar'>
+type FormDataError = Omit<FormData, 'date_of_birth'> & {
+  date_of_birth: string
+}
 const profileSchema = userSchema.pick(['name', 'address', 'phone', 'date_of_birth', 'avatar'])
 export default function Profile() {
-  const [file, setFile] = useState<File>()
+  const { profile, setProfile } = useContext(AppContext)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File>()
   const previewImages = useMemo(() => {
     return file ? URL.createObjectURL(file) : ''
   }, [file])
-  const { profile } = useContext(AppContext)
-  console.log('prooooooooooooossssssssssssss', profile)
-
   const {
+    handleSubmit,
     register,
+    watch,
+    setError,
     control,
     formState: { errors },
-    watch,
-    handleSubmit,
     setValue
   } = useForm<FormData>({
     defaultValues: {
       name: profile?.name || '',
-      phone: '',
-      address: '',
-      avatar: '',
+      phone: profile?.phone || '',
+      address: profile?.address || '',
+      avatar: profile?.avatar || '',
       date_of_birth: new Date(1990, 0, 1)
     },
     resolver: yupResolver(profileSchema)
   })
-  const avatar = watch('avatar')
-  const { data: userProfileData, refetch } = useQuery({
-    queryKey: ['user'],
+  const { data: profileDatas, refetch } = useQuery({
+    queryKey: ['profile'],
     queryFn: userApi.getProfile
   })
-  const profileData = userProfileData?.data.data
-  console.log(profileData)
+  const updateProfileMutation = useMutation({ mutationFn: userApi.updateProfile, onSuccess: () => refetch() })
+  const updateAvatarProfileMutation = useMutation({ mutationFn: userApi.uploadAvatar, onSuccess: () => refetch() })
+  const profileData = profileDatas?.data.data
   useEffect(() => {
-    if (profileData) {
-      setValue('name', profileData?.name)
-      setValue('phone', profileData?.phone)
-      setValue('address', profileData?.address)
-      setValue('avatar', profileData?.avatar)
-      setValue('date_of_birth', profileData?.date_of_birth ? new Date(profileData.date_of_birth) : new Date(1990, 0, 1))
-    }
+    setValue('name', profileData?.name)
+    setValue('avatar', profileData?.avatar)
+    setValue('date_of_birth', profileData?.date_of_birth ? new Date(profileData?.date_of_birth) : new Date(1990, 0, 1))
+    setValue('address', profileData?.address)
+    setValue('phone', profileData?.phone)
   }, [profileData, setValue])
-  const updateProfileMutation = useMutation({
-    mutationFn: userApi.updateProfile,
-    onSuccess: () => {
-      refetch()
-    }
-  })
-  const uploadAvatarMutation = useMutation({
-    mutationFn: (body: FormData) => userApi.uploadAvatar(body),
-    onSuccess: () => {
-      refetch()
-    }
-  })
+  const avatar = watch('avatar')
+
   const onSubmit = handleSubmit(async (data) => {
     try {
-      let avatarName = avatar
+      let avatarsName = avatar
       if (file) {
         const form = new FormData()
         form.append('image', file)
-        const uploadRef = await uploadAvatarMutation.mutateAsync(form)
-        avatarName = uploadRef.data.data
-        setValue('avatar', avatarName)
+        const avatarUpdate = await updateAvatarProfileMutation.mutateAsync(form)
+        avatarsName = avatarUpdate.data.data
+        setValue('avatar', avatarsName)
       }
-      await updateProfileMutation.mutateAsync({
+      const res = await updateProfileMutation.mutateAsync({
         ...data,
         date_of_birth: data.date_of_birth?.toISOString(),
-        avatar: avatarName
+        avatar: avatarsName
       })
+      setProfile(res.data.data)
+      setProfileFromLS(res.data.data)
       refetch()
     } catch (error) {
-      toast.error(`${error}`)
+      if (isAxiosUnprocessableEntityError<ErrorResponse<FormDataError>>(error)) {
+        const formError = error.response?.data.data
+        if (formError) {
+          Object.keys(formError).forEach((key) => {
+            setError(key as keyof FormDataError, {
+              message: formError[key as keyof FormDataError],
+              type: 'Server'
+            })
+          })
+        }
+      }
     }
   })
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const fileFormLocal = event.target.files?.[0]
-    setFile(fileFormLocal)
-  }
   const handleUpLoad = () => {
     fileInputRef.current?.click()
   }
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileFromLocal = event.target.files?.[0]
 
+    if ((fileFromLocal && fileFromLocal.size >= config.maxSizeFromLocal) || !fileFromLocal?.type.includes('image'))
+      toast.error(`Dung lượng file tối đa 1MB Định dạng: .JEPG, .PNG`, {
+        position: 'top-center'
+      })
+    else setFile(fileFromLocal)
+    console.log(fileFromLocal)
+  }
   return (
     <div className='rounded-sm bg-white md:px-7 px-2 pb-10 md:pb-20 shadow'>
       <div className='border-b border-b-gray-200 py-6'>
@@ -178,7 +188,11 @@ export default function Profile() {
             <div className='w-[20%] truncate pt-3 text-right capitalize' />
             <div className='w-[80%] pl-5'>
               <Button
-                onClick={() => toast.success('cập nhật dữ liệu thành công')}
+                onClick={() =>
+                  toast.success('cập nhật dữ liệu thành công', {
+                    position: 'top-center'
+                  })
+                }
                 className='flex h-9 items-center bg-orange px-5 text-center text-sm text-white hover:bg-orange/80'
               >
                 Lưu
@@ -197,12 +211,12 @@ export default function Profile() {
             </div>
             <input
               type='file'
-              name=''
               className='hidden'
-              id=''
               accept='.jpg,.jpeg,.png'
               ref={fileInputRef}
               onChange={onFileChange}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onClick={(event) => ((event.target as any).value = null)}
             />
             <button
               onClick={handleUpLoad}

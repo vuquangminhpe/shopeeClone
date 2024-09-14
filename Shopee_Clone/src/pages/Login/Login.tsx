@@ -27,6 +27,7 @@ export default function Login() {
     setError,
     register,
     handleSubmit,
+    watch,
     formState: { errors }
   } = useForm<FormData>({
     resolver: yupResolver(loginSchema)
@@ -40,7 +41,6 @@ export default function Login() {
     loginAccountMutation.mutate(data, {
       onSuccess: (data) => {
         setProfile(data.data.data.user)
-        console.log('dataaaaaaaaa', data.data)
 
         setIsAuthenticated(true)
         navigate(path.home)
@@ -98,7 +98,7 @@ export default function Login() {
     }
 
     try {
-      console.log('Facebook response:', response) // Debug thông tin response
+      console.log('Facebook response:', response)
 
       setIsAuthenticated(true)
       setProfile(response)
@@ -106,14 +106,13 @@ export default function Login() {
 
       saveAccessTokenToLS(`Bearer ${response.accessToken}`)
     } catch (error) {
-      console.error('Error processing Facebook login', error)
       toast.error('Error processing Facebook login')
     }
   }
 
   const login = useGoogleLogin({
     onSuccess: handleLoginSuccess,
-    onError: (error) => console.log('Login Failed:', error)
+    onError: (error) => toast.error(`Login Failed: ${error}`)
   })
   return (
     <div className=' bg-orange '>

@@ -4,6 +4,7 @@ import type { RegisterOptions, UseFormGetValues } from 'react-hook-form'
 import * as yup from 'yup'
 type Rules = { [key in 'email' | 'password' | 'confirm_password']?: RegisterOptions }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export const getRules = (getValues?: UseFormGetValues<any>): Rules => ({
   email: {
     required: {
@@ -91,16 +92,27 @@ export const schema = yup.object({
   name: yup.string().trim().required('name không được trống')
 })
 
-export const userSchema = yup.object({
+export const userSchema = schema.shape({
   name: yup.string().max(160, 'Độ dài tối đa là 160'),
   phone: yup.string().max(20, 'Độ dài tối đa là 160'),
   address: yup.string().max(160, 'Độ dài tối đa là 160'),
   date_of_birth: yup.date().max(new Date(), 'Hãy chọn một ngày trong quá khứ'),
-  password: schema.fields['password'],
-  new_password: schema.fields['password'],
-  confirm_password: schema.fields['confirm_password'],
+  password: yup
+    .string()
+    .required('Password là bắt buộc')
+    .min(5, 'Độ dài từ 5 - 160 kí tự')
+    .max(160, 'Độ dài từ 5 - 160 kí tự'),
+  new_password: schema.fields['password'] as yup.StringSchema,
+  confirm_password: yup
+    .string()
+    .required('Nhập lại password là bắt buộc')
+    .min(5, 'Độ dài từ 5 - 160 kí tự')
+    .max(160, 'Độ dài từ 5 - 160 kí tự')
+    .oneOf([yup.ref('new_password')], 'Nhập lại password không khớp'),
+
   avatar: yup.string().max(1000, 'Độ dài tôi đa 1000 ký tự')
 })
+
 export const loginSchema = schema.omit(['confirm_password'])
 export type Schema = yup.InferType<typeof schema>
 export type UserSchema = yup.InferType<typeof userSchema>
