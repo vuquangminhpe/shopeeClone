@@ -7,6 +7,7 @@ import { clearLocalStorage } from '../../utils/auth'
 import { purchaseStatus } from '../../constants/purchase'
 import { useQueryClient } from '@tanstack/react-query'
 import { getAvatarUrl } from '../../utils/utils'
+import Button from '../Button'
 
 export default function NavHeader() {
   const navigate = useNavigate()
@@ -96,12 +97,12 @@ export default function NavHeader() {
               <Link to={path.profile} className='py-2 px-3 hover:text-[#40E0D0] hover:bg-gray-100'>
                 Tài khoản của tôi
               </Link>
-              <Link to={path.home} className='py-2 px-3 hover:text-[#40E0D0] hover:bg-gray-100'>
+              <Link to={path.historyPurchase} className='py-2 px-3 hover:text-[#40E0D0] hover:bg-gray-100'>
                 Đơn mua
               </Link>
-              <button onClick={handleLogout} className='text-start py-2 px-3 hover:text-[#40E0D0] hover:bg-gray-100'>
+              <Button onClick={handleLogout} className='text-start py-2 px-3 hover:text-[#40E0D0] hover:bg-gray-100'>
                 Đăng xuất
-              </button>
+              </Button>
             </div>
           </div>
         }

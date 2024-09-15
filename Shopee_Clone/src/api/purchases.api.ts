@@ -1,3 +1,4 @@
+import { purchaseStatus } from '../constants/purchase'
 import { Purchase, PurchaseListStatus } from '../types/purchase.type'
 import { SuccessResponse } from '../types/utils.type'
 import http from '../utils/http'
@@ -11,7 +12,7 @@ const purchaseApi = {
     }),
   buyProducts: (body: { product_id: string; buy_count: number }[]) =>
     http.post<SuccessResponse<Purchase[]>>(`${URL}/buy-products`, body),
-  updatePurchase: (body: { product_id: string; buy_count: number }) =>
+  updatePurchase: (body: { product_id: string; buy_count: number; status?: number }) =>
     http.put<SuccessResponse<Purchase>>(`${URL}/update-purchase`, body),
   deletePurchase: (purchaseID: string[]) =>
     http.delete<SuccessResponse<{ deleted_count: number }>>(`${URL}`, {
