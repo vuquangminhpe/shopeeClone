@@ -3,7 +3,7 @@ import path from '../../../../constants/path'
 import classNames from 'classnames'
 import { order, sortBy } from '../../../../constants/product'
 import { ProductListConfig } from '../../../../types/product.type'
-import { omit } from 'lodash'
+import omit from 'lodash/omit'
 import { queryConfig } from '../../../../hooks/useQueryConfig'
 
 interface Props {

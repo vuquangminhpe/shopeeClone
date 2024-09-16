@@ -9,7 +9,7 @@ import Button from '../../Components/Button'
 import React, { useContext, useEffect } from 'react'
 import { Purchase } from '../../types/purchase.type'
 import { produce } from 'immer'
-import { keyBy } from 'lodash'
+import keyBy from 'lodash/keyBy'
 import { AppContext } from '../../Contexts/app.context'
 import { toast } from 'react-toastify'
 export interface ExtendedPurchases extends Purchase {

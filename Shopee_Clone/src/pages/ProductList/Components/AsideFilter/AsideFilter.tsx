@@ -12,9 +12,9 @@ import { Schema, schema } from '../../../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { toast } from 'react-toastify'
 import RatingStars from '../../../RatingStars'
-import { omit } from 'lodash'
+import omit from 'lodash/omit'
 import { queryConfig } from '../../../../hooks/useQueryConfig'
-
+import { useTranslation } from 'react-i18next'
 interface Props {
   categories: Category[]
   queryParamsConfig: queryConfig
@@ -25,6 +25,7 @@ const removeUndefinedFields = (obj: Record<string, any>) => {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined && v !== ''))
 }
 export default function AsideFilter({ categories, queryParamsConfig }: Props) {
+  const { t } = useTranslation()
   const { category } = queryParamsConfig
   const navigate = useNavigate()
   const {
