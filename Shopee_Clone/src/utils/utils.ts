@@ -1,7 +1,6 @@
 import axios, { AxiosError } from 'axios'
 import HttpStatusCode from '../constants/httpStatusCode.enum'
 import config from '../constants/config'
-import userImages from '../assets/user.svg'
 export function isAxiosError<T>(error: unknown): error is AxiosError<T> {
   return axios.isAxiosError(error)
 }
@@ -40,4 +39,6 @@ export function rateSale(original: number, sale: number) {
 }
 
 export const getAvatarUrl = (avatarName?: string) =>
-  avatarName ? `${config.BASEUrl}/images/${avatarName}` : userImages
+  avatarName
+    ? `${config.BASEUrl}/images/${avatarName}`
+    : 'https://cf.shopee.vn/file/d04ea22afab6e6d250a370d7ccc2e675_tn'

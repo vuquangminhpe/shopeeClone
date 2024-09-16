@@ -27,7 +27,6 @@ export default function Login() {
     setError,
     register,
     handleSubmit,
-    watch,
     formState: { errors }
   } = useForm<FormData>({
     resolver: yupResolver(loginSchema)
@@ -185,11 +184,13 @@ export default function Login() {
             </div>
           </div>
 
-          <div className='flex p-4 justify-center text-center'>
-            <p className='opacity-50 mr-3'>Bạn mới biết đến Shopee?</p>{' '}
-            <p className=''>
-              <Link to={path.register}>Đăng ký</Link>
-            </p>
+          <div className='flex flex-col p-4 justify-center text-center items-center'>
+            <p className='mr-3 flex'>
+              <p className='text-gray-300 mr-2'>Bạn mới biết đến Shopee?</p>
+              <Link className='text-black' to={path.register}>
+                Đăng ký
+              </Link>
+            </p>{' '}
           </div>
         </form>
       </div>

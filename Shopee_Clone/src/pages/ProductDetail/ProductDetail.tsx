@@ -23,7 +23,7 @@ export default function ProductDetail() {
     queryKey: ['product', id],
     queryFn: () => productApi.getProductDetail(id as string)
   })
-  const { isAuthenticated } = useContext(AppContext)
+  const { isAuthenticated, profile } = useContext(AppContext)
   const product = productData?.data.data
   const queryConfig: ProductListConfig = { limit: '20', page: '1', category: product?.category._id }
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
@@ -102,13 +102,17 @@ export default function ProductDetail() {
     )
   }
   const buyNow = async () => {
-    const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
-    const purchasesId = res.data.data
-    navigate(path.cart, {
-      state: {
-        purchasesId: purchasesId._id
-      }
-    })
+    if (profile) {
+      const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
+      const purchasesId = res.data.data
+      navigate(path.cart, {
+        state: {
+          purchasesId: purchasesId._id
+        }
+      })
+    } else {
+      navigate('/login')
+    }
   }
   if (!product) return null
   return (

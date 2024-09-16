@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createSearchParams, Link, useNavigate } from 'react-router-dom'
 import path from '../../../../constants/path'
 import Button from '../../../../Components/Button'
@@ -9,7 +11,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { Schema, schema } from '../../../../utils/rules'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { toast } from 'react-toastify'
-import { NoUndefinedField } from '../../../../types/utils.type'
 import RatingStars from '../../../RatingStars'
 import { omit } from 'lodash'
 import { queryConfig } from '../../../../hooks/useQueryConfig'
@@ -18,9 +19,11 @@ interface Props {
   categories: Category[]
   queryParamsConfig: queryConfig
 }
-type FormData = NoUndefinedField<Pick<Schema, 'price_max' | 'price_min'>>
+type FormData = Pick<Schema, 'price_max' | 'price_min'>
 const priceSchema = schema.pick(['price_min', 'price_max'])
-
+const removeUndefinedFields = (obj: Record<string, any>) => {
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined && v !== ''))
+}
 export default function AsideFilter({ categories, queryParamsConfig }: Props) {
   const { category } = queryParamsConfig
   const navigate = useNavigate()
@@ -39,22 +42,23 @@ export default function AsideFilter({ categories, queryParamsConfig }: Props) {
     shouldFocusError: false
   })
   const onSubmit = handleSubmit(
-    (data) => {},
-    (err) => {
-      err.price_max?.ref.focus()
-    }
+    () => {},
+    () => {}
   )
   const valueForm = watch()
   const handleSortPrice = () => {
+    const cleanedQueryParams = removeUndefinedFields({
+      ...queryParamsConfig,
+      price_min: valueForm.price_min,
+      price_max: valueForm.price_max
+    })
+
     navigate({
       pathname: path.home,
-      search: createSearchParams({
-        ...queryParamsConfig,
-        price_min: valueForm.price_min,
-        price_max: valueForm.price_max
-      }).toString()
+      search: createSearchParams(cleanedQueryParams).toString()
     })
   }
+
   const handleRemoveAll = () => {
     navigate({
       pathname: path.home,
