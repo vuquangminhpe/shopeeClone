@@ -1,6 +1,3 @@
-import icons from 'C:/Users/84979/Desktop/shopeeClone/Shopee_Clone/src/Components/imgs/dvvc.png'
-import iconst from 'C:/Users/84979/Desktop/shopeeClone/Shopee_Clone/src/Components/imgs/payment.png'
-
 export default function Footer() {
   return (
     <footer className='  py-16 bg-neutral-100'>
@@ -31,8 +28,6 @@ export default function Footer() {
           <div className='lg:col-span-3'>
             <div>
               <div className='font-bold'>Thanh toán</div>{' '}
-              <img className='w-80 h-40 object-contain mb-2' src={icons} alt='DVVC' />
-              <img className='w-80 h-40 object-contain' src={iconst} alt='DVVC' />
             </div>
           </div>
         </div>
