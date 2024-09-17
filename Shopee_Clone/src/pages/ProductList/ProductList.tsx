@@ -7,7 +7,6 @@ import Paginate from '../../Components/Paginate'
 import { ProductListConfig } from '../../types/product.type'
 import categoryApi from '../../api/category.api'
 import useQueryConfig from '../../hooks/useQueryConfig'
-
 export default function ProductList() {
   const queryParamsConfig = useQueryConfig()
   const { data: productData } = useQuery({
@@ -21,6 +20,7 @@ export default function ProductList() {
     queryFn: () => categoryApi.getCategories(),
     staleTime: Infinity
   })
+
   return (
     <div className='bg-gray-200 py-6'>
       <div className='container'>

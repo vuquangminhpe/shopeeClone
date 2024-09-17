@@ -22,6 +22,7 @@ export default function Header() {
     enabled: Boolean(isAuthenticated)
   })
   const purchaseInCart = purchasesInCartData?.data.data
+
   return (
     <div className='pb-5 pt-2 bg-[linear-gradient(-180deg,#f53d2d,#f63)]'>
       <div className='container'>
@@ -128,9 +129,12 @@ export default function Header() {
                           : ' '}
                         Thêm vào giỏ hàng
                       </Link>
-                      <button className='capitalize bg-orange hover:bg-opacity-90 rounded-sm px-4 py-2 text-white'>
+                      <Link
+                        to={path.cart}
+                        className='mb-2 mr-2 capitalize bg-orange hover:bg-opacity-90 rounded-sm px-4 py-2 text-white'
+                      >
                         ĐẶT HÀNG NGAY
-                      </button>
+                      </Link>
                     </div>
                   )}
                 </div>

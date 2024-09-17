@@ -25,13 +25,14 @@ const removeUndefinedFields = (obj: Record<string, any>) => {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined && v !== ''))
 }
 export default function AsideFilter({ categories, queryParamsConfig }: Props) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('home')
   const { category } = queryParamsConfig
   const navigate = useNavigate()
   const {
     control,
     watch,
     trigger,
+    reset,
     handleSubmit,
     formState: { errors }
   } = useForm<FormData>({
@@ -61,6 +62,7 @@ export default function AsideFilter({ categories, queryParamsConfig }: Props) {
   }
 
   const handleRemoveAll = () => {
+    reset()
     navigate({
       pathname: path.home,
       search: createSearchParams(
@@ -92,7 +94,7 @@ export default function AsideFilter({ categories, queryParamsConfig }: Props) {
             </g>
           </g>
         </svg>{' '}
-        Tất cả danh mục
+        {t('aside filter.all categories')}
       </Link>
       <div className='bg-gray-300 h-[1px] my-4' />
       <ul>
@@ -140,7 +142,7 @@ export default function AsideFilter({ categories, queryParamsConfig }: Props) {
             strokeMiterlimit={10}
           />
         </svg>
-        Bộ lọc tìm kiếm
+        {t('aside filter.filter search')}
       </Link>
       <div className='bg-gray-300 h-[1px] my-4' />
 

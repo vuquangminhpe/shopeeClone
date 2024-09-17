@@ -18,6 +18,7 @@ import { saveAccessTokenToLS, setProfileFromLS } from '../../utils/auth'
 import Button from '../../Components/Button'
 import path from '../../constants/path'
 import authApi from '../../api/auth.api'
+
 type FormData = Pick<Schema, 'email' | 'password'>
 const loginSchema = schema.pick(['email', 'password'])
 export default function Login() {

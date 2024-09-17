@@ -13,7 +13,7 @@ const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(function Inpu
     classNameInput = 'rounded-sm focus:shadow-sm p-3 w-full outline-none border border-gray-300 focus:border-gray-500',
     classNameError = 'mt-1 text-red-600 min-h-[1.25rem] text-sm',
     onChange,
-    value = '',
+    value,
     ...rest
   },
   ref
@@ -23,13 +23,18 @@ const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(function Inpu
     const { value } = event.target
     if (/^\d+$/.test(value) || value === '') {
       onChange && onChange(event)
-      //Cập nhật localValue
       setLocalValue(value)
     }
   }
   return (
     <div className={className}>
-      <input className={classNameInput} onChange={handleChange} value={value || localValue} {...rest} ref={ref} />
+      <input
+        className={classNameInput}
+        onChange={handleChange}
+        value={value === undefined ? localValue : value}
+        {...rest}
+        ref={ref}
+      />
       <div className={classNameError}>{errorMessage}</div>
     </div>
   )
